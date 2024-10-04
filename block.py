@@ -1,13 +1,13 @@
 # simulate a block of memory
 
 import math
-from pympler import asizeof
+from analyzer import MemoryAnalyzer
 
 class Block:
     MAXSIZE = 512
 
     def __init__(self, obj):
-        size = asizeof.asizeof(obj)
+        size = MemoryAnalyzer.measure_size(obj)
         allocated_block, size_class_idx = self.bytes_size(size)
 
         self.obj = obj

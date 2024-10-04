@@ -1,10 +1,8 @@
-# Simulate the memory manager that manages the memory blocks, pools, and arenas.
-
 from block import Block
 from pool import Pool
 from arena import Arena
-from pympler import asizeof
 
+# Simulate the memory manager that manages the memory blocks, pools, and arenas.
 # memorymanager is a singleton class
 # only three methods should ever be called/exposed on this class,
 # that being get_instance, allocate, and deallocate
@@ -75,8 +73,8 @@ class MemoryManager:
         block = self._allocate_block(obj)
         # if there is no block since no pool, create a new pool
         if block is None:
-            pool = self._allocate_pool(asizeof.asizeof(obj))
             block = Block(obj)
+            pool = self._allocate_pool(block.block_size)
             pool.blocks.append(block)
             pool.bytes += block.block_size
 
