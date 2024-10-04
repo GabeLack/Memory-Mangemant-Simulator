@@ -2,10 +2,6 @@ from pympler import asizeof, tracker, muppy, summary
 import matplotlib.pyplot as plt
 import logging
 
-from pympler import asizeof, tracker, muppy, summary
-import matplotlib.pyplot as plt
-import logging
-
 class MemoryAnalyzer:
     """A class used to analyze and track memory usage of Python objects."""
 

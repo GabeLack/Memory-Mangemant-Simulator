@@ -1,6 +1,4 @@
-from block import Block
-from pool import Pool
-from arena import Arena
+from memory import Arena, Pool, Block
 
 # Simulate the memory manager that manages the memory blocks, pools, and arenas.
 # memorymanager is a singleton class
