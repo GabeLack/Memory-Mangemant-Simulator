@@ -7,9 +7,10 @@ class Arena:
     def __init__(self):
         self.pools = []
         self.bytes = 0
-        self.free = True
 
-    def check_arena(self, pool_size):
+    def check_arena(self, pool_size = 4000):
+        if not isinstance(pool_size, int):
+            raise TypeError("Pool size must be an integer")
         # Check if adding the new pool would exceed the maximum size
         return self.bytes + pool_size <= self.MAXSIZE and pool_size == Pool.MAXSIZE
 
@@ -19,15 +20,16 @@ class Pool:
     def __init__(self, block_size):
         if not isinstance(block_size, int):
             raise TypeError("Block size must be an integer")
-        if block_size % 8 != 0:
+        if block_size % 8 != 0 or block_size == 0:
             raise ValueError("Block size must be divisible by 8")
 
         self.blocks = []
         self.bytes = 0
         self.block_size = block_size
-        self.free = True
 
     def check_pool(self, block_size):
+        if not isinstance(block_size, int):
+            raise TypeError("Block size must be an integer")
         return self.bytes + block_size <= self.MAXSIZE and self.block_size == block_size
 
 class Block:
@@ -41,4 +43,3 @@ class Block:
 
         self.obj = obj
         self.block_size = size
-        self.free = True

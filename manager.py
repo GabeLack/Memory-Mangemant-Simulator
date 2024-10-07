@@ -1,4 +1,5 @@
 from memory import Arena, Pool, Block
+from pympler import asizeof
 
 # Simulate the memory manager that manages the memory blocks, pools, and arenas.
 # memorymanager is a singleton class
@@ -28,6 +29,9 @@ class MemoryManager:
             raise Exception("This class is a singleton!")
         else:
             self.arenas = []
+            self.free_blocks = []
+            self.free_pools = []
+            self.free_arenas = []
             MemoryManager._instance = self
 
     @staticmethod
@@ -36,36 +40,62 @@ class MemoryManager:
             MemoryManager()
         return MemoryManager._instance
 
+    def _allocate_arena(self):
+        if self.free_arenas:
+            # check if there is a free arena
+            arena = self.free_arenas.pop()
+        else:
+            # if there is no free arena, create a new arena
+            arena = Arena()
 
-    def _allocate_block(self, obj):
-        block = Block(obj)
-        for arena in self.arenas:
-            for pool in arena.pools:
-                # check if the pool has enough space for the block
-                if pool.check_pool(block.block_size):
-                    pool.blocks.append(block)
-                    pool.bytes += block.block_size
-                    return block
-        return None
+        self.arenas.append(arena)
+        return arena
 
     def _allocate_pool(self, block_size):
-        pool = Pool(block_size)
+        if self.free_pools:
+            # check if there is a free pool
+            pool = self.free_pools.pop()
+            pool.block_size = block_size
+        else:
+            # if there is no free pool, create a new pool
+            pool = Pool(block_size)
+
         for arena in self.arenas:
             # check if the arena has enough space for the pool
             if arena.check_arena(pool.MAXSIZE):
                 arena.pools.append(pool)
                 arena.bytes += pool.MAXSIZE
                 return pool
+
         # If no existing arena can fit the pool, create a new arena
         arena = self._allocate_arena()
         arena.pools.append(pool)
         arena.bytes += pool.MAXSIZE
         return pool
 
-    def _allocate_arena(self):
-        arena = Arena()
-        self.arenas.append(arena)
-        return arena
+    def _allocate_block(self, obj):
+        if self.free_blocks:
+            # check if there is a free block
+            block = self.free_blocks.pop()
+
+            size = asizeof.asizeof(obj)
+            if size > block.MAXSIZE:
+                raise ValueError("Size too large")
+            block.obj = obj
+            block.block_size = size
+        else:
+            # if there is no free block, create a new block
+            block = Block(obj)
+
+        for arena in self.arenas:
+            if arena.check_arena(4000):
+                for pool in arena.pools:
+                    # check if the pool has enough space for the block
+                    if pool.check_pool(block.block_size):
+                        pool.blocks.append(block)
+                        pool.bytes += block.block_size
+                        return block
+        return None
 
     def allocate(self, obj):
         block = self._allocate_block(obj)
@@ -85,14 +115,23 @@ class MemoryManager:
                     pool.blocks.remove(block)
                     pool.bytes -= block.block_size
 
+                    # save the block for reuse
+                    self.free_blocks.append(block)
+
                     # if the pool is empty, remove the pool from the arena
-                    if len(pool.blocks) == 0:
+                    if pool.bytes == 0:
                         arena.pools.remove(pool)
                         arena.bytes -= pool.MAXSIZE
 
+                        # save the pool for reuse
+                        self.free_pools.append(pool)
+
                     # if the arena is empty, remove the arena from the memory manager
-                    if len(arena.pools) == 0:
+                    if arena.bytes == 0:
                         self.arenas.remove(arena)
+
+                        # save the arena for reuse
+                        self.free_arenas.append(arena)
 
                     return True
         return False
