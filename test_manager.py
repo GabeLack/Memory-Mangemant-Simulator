@@ -22,10 +22,6 @@ class TestMemoryManager(unittest.TestCase):
         self.manager = MemoryManager.get_instance()
         self.manager.arenas = []  # Reset the singleton instance for each test
 
-    def tearDown(self):
-        # Reset the singleton instance for each test
-        MemoryManager._instance = None
-
     def test_get_instance(self):
         self.manager = MemoryManager.get_instance()
         self.assertIsInstance(self.manager, MemoryManager)
