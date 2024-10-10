@@ -51,7 +51,7 @@ pip install -r requirements.txt
 
 #### Example Usage
 
-the `test.py` file contains an example usage of the analyzer working with manager and memory objects, which created the `Memory_log.txt` file for illustration purposes. Such as returning this summarized output after the 30 seconds.
+the `test.py` file contains an example usage of the analyzer working with the manager and memory objects, which created the `Memory_log.txt` file for illustration purposes. Such as returning this summarized output after the 30 seconds.
 
 ```
     2024-10-08 23:42:36,145 - Type: memory.Arena, Count: 3, Size: 144 bytes
